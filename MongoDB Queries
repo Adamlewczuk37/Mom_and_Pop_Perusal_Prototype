@@ -1,0 +1,55 @@
+db.Yelp_Lite.aggregate([
+ {
+     "$group": { #Group restaurants with same name to sets
+         _id: {name: "$name"},
+         dups: { $addToSet: "$_id" } ,
+         count: { $sum : 1 }
+     }
+ },
+ {
+     "$match": { #Target sets with 5 or more of the same restaurant
+         count: { "$gt": 4 }
+     }
+ }
+]).forEach(function(doc) {
+   db.Yelp_Lite.remove({
+       _id: {$in: doc.dups} #Remove all chain restaurants
+   });
+})
+
+db.Yelp_Lite.aggregate([
+  { #Correct format of categories field
+    "$project": {
+      “business_id”: 1,
+	"name": 1,
+      "address": 1,
+	“city”: 1,
+	“state”: 1,
+	“postal_code”: 1,
+	“latitude”: 1,
+	“longitude”: 1,
+	“attributes”: 1,
+      "stars": 1,
+      "review_count": 1,
+      "categories": { "$split": ["$categories", ", "] }
+    }
+  },
+  {
+    "$out": “Mom_And_Pop”
+  }
+])
+
+db.Yelp_Lite.aggregate([
+  {
+    "$match": { #Find all entries that are no restaurants
+      "categories": { "$nin": ["Restaurants", "Food", "Cafes", "Bakeries"] }
+    }
+  },
+  {
+    "$project": {
+      "_id": 1
+    }
+  }
+]).forEach(function(doc) {
+  db.Yelp_Lite.deleteOne({"_id": doc._id}); #Remove all non-restaurant entries from the dataset
+});
