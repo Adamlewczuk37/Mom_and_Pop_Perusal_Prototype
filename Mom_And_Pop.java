@@ -1,81 +1,81 @@
-import java.io.FileReader;
+import java.io.FileReader; // Import file reading libraries to read JSON file
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import com.google.gson.Gson;
+import com.google.gson.Gson; // Import GSON libraries to convert JSON to data structures
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import java.util.Scanner;
+import java.util.Scanner; // Import built-in data structures
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
+import java.util.Random;
 
 class Yelp {
     public static void main(String[] args) {
-        String filepath = "../json_dataset.txt"; //Reference created JSON file on Desktop
+        String filepath = "../json_dataset.txt"; // Reference created JSON file on Desktop
         StringBuilder stringBuilder = new StringBuilder();
 
-        try (FileReader reader = new FileReader(filepath); //Create new file reader as a BufferedReader
+        try (FileReader reader = new FileReader(filepath); // Create new file reader as a BufferedReader
             BufferedReader buffer = new BufferedReader(reader);
         ){
             String line = "";
             while ((line = buffer.readLine()) != null) {
-               stringBuilder.append(line); //Read line-by-line  with the file reader and append to the StringBuilder
+               stringBuilder.append(line); // Read line-by-line  with the file reader and append to the StringBuilder
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String jsonInput = stringBuilder.toString(); //Convert file to a String
+        String jsonInput = stringBuilder.toString(); // Convert file to a String
 
         RestaurantArray dataset = new RestaurantArray();
-        dataset.fillList(jsonInput); //Create and load in a new dataset that stores in every restaurant
-        RestaurantArray datasetCopy = new RestaurantArray(dataset); //Perform deep copy of the dataset
+        dataset.fillList(jsonInput); // Create and load in a new dataset that stores in every restaurant
+        RestaurantArray datasetCopy = new RestaurantArray(dataset); // Perform deep copy of the dataset
 
-        Scanner reader = new Scanner(System.in); //Create reader to scan user inputs in command line
-        String input = ""; //Initialize variables used for inputs in main code
+        Scanner reader = new Scanner(System.in); // Create reader to scan user inputs in command line
+        String input = ""; // Initialize variables used for inputs in main code
         String endLoop = "";
         String stateInput = "";
         String cityInput = "";
 
         System.out.println( "Welcome to Mom & Pop Perusal!");
         
-        while (!(endLoop.equals("f"))){ //Condition to end the while loop is setting endLoop to "f"
+        while (!(endLoop.equals("f"))){ // Condition to end the while loop is setting endLoop to "f"
             System.out.print("Enter the state abbreviation that you would like to search in. Otherwise, enter 'n'. ");
-            input = reader.next(); //Read in the input to filter by state abbreviation
+            input = reader.next(); // Read in the input to filter by state abbreviation
             if (!(input.equals("n"))){
                stateInput = input;
             }
 
             System.out.print("Enter the city that you would like to search in. Otherwise, enter 'n'. ");
-            input = reader.next(); //Read in the input to filter by city
+            input = reader.next(); // Read in the input to filter by city
             if (!(input.equals("n"))){
                cityInput = input;
             }
 
-            ArrayList<Integer> numbers = new ArrayList<Integer>(); //Create 3 arrays: one for user input of numbers, one for 
-                                                                   //attached restaurant categories, and one all selected categories
+            ArrayList<Integer> numbers = new ArrayList<Integer>(); // Create 3 arrays: one for user input of numbers, one for 
+                                                                   // attached restaurant categories, and one all selected categories
             ArrayList<String> selectedCuisines = new ArrayList<String>();
             ArrayList<String> intermediateCuisines = new ArrayList<String>();
-            CuisineMap availableCuisines = new CuisineMap(); //Create and load hashmap that maps numbers to cuisines
+            CuisineMap availableCuisines = new CuisineMap(); // Create and load hashmap that maps numbers to cuisines
             availableCuisines.LoadCuisines();
-            availableCuisines.PrintCuisines(); //Print available options to the user
+            availableCuisines.PrintCuisines(); // Print available options to the user
             int number = 0;
 
             System.out.print("Enter number(s) based on the cuisine(s) wanted above seperated by spaces. Otherwise, enter 'n'.\n");
             System.out.print("To exit, please enter 'x'. ");
             while (!(input.equals("x"))){
-               input = reader.next(); //Capture sequence of numbers entered by the user
-               if (input.equals("n")){ //Terminate user input immediately
+               input = reader.next(); // Capture sequence of numbers entered by the user
+               if (input.equals("n")){ // Terminate user input immediately
                   break;
                }
                try {
                   number = Integer.parseInt(input);
-                  numbers.add(number); //Add numbers to array if valid
+                  numbers.add(number); // Add numbers to array if valid
                } catch(Exception e) {
                   break;
                }
@@ -84,76 +84,76 @@ class Yelp {
             if (!(input.equals("n"))){
                for (int i = 0; i < numbers.size(); i++){
                   number = numbers.get(i);
-                  intermediateCuisines =  availableCuisines.getCuisines().get(number); //Find associated restaurant categories for each number
+                  intermediateCuisines =  availableCuisines.getCuisines().get(number); // Find associated restaurant categories for each number
                   for (int j = 0; j < intermediateCuisines.size(); j++){
-                     selectedCuisines.add(intermediateCuisines.get(j)); //Add all categories to main array
+                     selectedCuisines.add(intermediateCuisines.get(j)); // Add all categories to main array
                   }
                }
             }
 
-            boolean cont = false; //Boolean to skip extra conditions if an index was already flagged for removal
+            boolean cont = false; // Boolean to skip extra conditions if an index was already flagged for removal
             int length = dataset.getRestaurants().size();
-            ArrayList<Integer> indicesToRemove = new ArrayList<Integer>(); //Initialize array of indices to remove
+            ArrayList<Integer> indicesToRemove = new ArrayList<Integer>(); // Initialize array of indices to remove
 
             for (int i = 0; i < length; i++){
                boolean disjoint = Collections.disjoint(selectedCuisines, dataset.getRestaurants().get(i).getCategories()); //Find if selected categories and restaurant's categories don't match
                cont = false;
                if (!(stateInput.equals(""))){
                   if (!(dataset.getRestaurants().get(i).getState().equals(stateInput))){
-                     indicesToRemove.add(i); //Remove element if state does not match up to selection
+                     indicesToRemove.add(i); // Remove element if state does not match up to selection
                      cont = true;
                   }
                }
                if ((!(cityInput.equals(""))) && (cont == false)){
                   if (!(dataset.getRestaurants().get(i).getCity().equals(cityInput))){
-                     indicesToRemove.add(i); //Remove element if city does not match up to selection
+                     indicesToRemove.add(i); // Remove element if city does not match up to selection
                      cont = true;
                   }
                }
                if ((!(selectedCuisines.isEmpty())) && (cont == false)){
                   if (disjoint == true){
-                     indicesToRemove.add(i); //Remove element if it does match with any selected cuisines
+                     indicesToRemove.add(i); // Remove element if it does match with any selected cuisines
                   }
                }
             }
 
             length = indicesToRemove.size() - 1;
-            for (int i = length; i >= 0; i--){ //Remove all flagged indices from the dataset
+            for (int i = length; i >= 0; i--){ // Remove all flagged indices from the dataset
                int index = indicesToRemove.get(i);
                dataset.getRestaurants().remove(index);
             }
 
-            RestaurantArray results = new RestaurantArray(); //Initialize RestaurantArray to display options
+            RestaurantArray results = new RestaurantArray(); // Initialize RestaurantArray to display options
 
-            if (dataset.getRestaurants().size() == 0){ //Skip loop if no restaurants are left
+            if (dataset.getRestaurants().size() == 0){ // Skip loop if no restaurants are left
                System.out.println("No restaurants in the dataset remaining");
                System.out.println("Please add less to the filter or double-check your input");
                input = "2";
             } else {
-               dataset.shuffle(results); //If there are available options, shuffle and print options
+               dataset.shuffle(results); // If there are available options, shuffle and print options
                results.printTenElements(0);
                System.out.print("\n");
             }
 
             while (!(input.equals("2"))){
                System.out.print("Enter '1' to reshuffle options. Enter '2' to finish search. ");
-               input = reader.next(); //Capture user input
-               if (input.equals("1")){ //Reshuffle and print
+               input = reader.next(); // Capture user input
+               if (input.equals("1")){ // Reshuffle and print
                   dataset.shuffle(results);
                   results.printTenElements(0);
                   System.out.print("\n");
-               } else if ((!(input.equals("1"))) && (!(input.equals("2")))){ //Alert for invalid entry
+               } else if ((!(input.equals("1"))) && (!(input.equals("2")))){ // Alert for invalid entry
                   System.out.println("Invalid entry. Please enter again.");
                }
             }
 
-            System.out.print("Would you like to do another search? (y/n) "); //Option to either search again or terminate program
+            System.out.print("Would you like to do another search? (y/n) "); // Option to either search again or terminate program
             input = reader.next();
             if (input.equals("y")){
                input = "";
                stateInput = "";
                cityInput = "";
-               dataset.copy(datasetCopy); //Set dataset to the original through another deep copy
+               dataset.copy(datasetCopy); // Set dataset to the original through another deep copy
             } else {
                endLoop = "f";
             }
@@ -167,21 +167,21 @@ class Yelp {
 
 
 class RestaurantArray {
-   private ArrayList<Restaurant> restaurants; //Holds an ArrayList of Restaurants to function as the dataset
+   private ArrayList<Restaurant> restaurants; // Holds an ArrayList of Restaurants to function as the dataset
 
 
    public RestaurantArray(){
       restaurants = new ArrayList<>();
    }
 
-   public RestaurantArray(RestaurantArray other) { //Deep copy constructor
+   public RestaurantArray(RestaurantArray other) { // Deep copy constructor
         this.restaurants = new ArrayList<>();
         for (Restaurant restaurant : other.restaurants) {
             this.restaurants.add(new Restaurant(restaurant));
         }
     }
 
-    public void copy(RestaurantArray other) { //Allows for deep copy outside of a constructor
+    public void copy(RestaurantArray other) { // Allows for deep copy outside of a constructor
         this.restaurants = new ArrayList<>();
         for (Restaurant restaurant : other.restaurants) {
             this.restaurants.add(new Restaurant(restaurant));
@@ -193,22 +193,22 @@ class RestaurantArray {
       builder.setPrettyPrinting(); 
       Gson gson = builder.create();
 
-      Type listType = new TypeToken<ArrayList<Restaurant>>(){}.getType(); //Specify the type of this data structure
-      ArrayList<Restaurant> restaurantList = gson.fromJson(jsonFile, listType); //Load data into a temporary ArrayList
-      restaurants.addAll(restaurantList); //Copy all elements to ArrayList of this datatype
+      Type listType = new TypeToken<ArrayList<Restaurant>>(){}.getType(); // Specify the type of this data structure
+      ArrayList<Restaurant> restaurantList = gson.fromJson(jsonFile, listType); // Load data into a temporary ArrayList
+      restaurants.addAll(restaurantList); // Copy all elements to ArrayList of this datatype
    }
    
    public ArrayList<Restaurant> getRestaurants() { 
       return restaurants; 
    }
 
-   public void setRestaurants(Restaurant restaurant) { //Add Restaurants to the list
+   public void setRestaurants(Restaurant restaurant) { // Add Restaurants to the list
       restaurants.add(restaurant);
    }
 
-   public void shuffle(RestaurantArray results){ //Shuffle results into another RestaurantArray based on random number generation
-      results.getRestaurants().clear(); //Clear RestaurantArray to make room for new results
-      Set<Integer> uniqueRandom = new HashSet<>(); //Initialize variables for function to operate
+   public void shuffle(RestaurantArray results){ // Shuffle results into another RestaurantArray based on random number generation
+      results.getRestaurants().clear(); // Clear RestaurantArray to make room for new results
+      Set<Integer> uniqueRandom = new HashSet<>(); // Initialize variables for function to operate
       Random random = new Random();
       int size = restaurants.size() + 1;
 
@@ -218,12 +218,12 @@ class RestaurantArray {
       }
       
       for (int randomNumber : uniqueRandom){
-         Restaurant foundRestaurant = restaurants.get(randomNumber); //Load random elements from local ArrayList to new ArrayList
+         Restaurant foundRestaurant = restaurants.get(randomNumber); // Load random elements from local ArrayList to new ArrayList
          results.setRestaurants(foundRestaurant);
       }
    }
 
-   public void printTenElements(int ref){ //Nicely print 10 Restaurants from any starting index
+   public void printTenElements(int ref){ // Print 10 Restaurants from any starting index
       for (int i = ref; i < Math.min(ref + 10, restaurants.size()); i++){
          if (i >= ref){
             System.out.println(restaurants.get(i));
@@ -233,8 +233,8 @@ class RestaurantArray {
    }
 }
 
-class Restaurant { //Data structure to load Yelp database in JSON format
-   private String _id; //Each attribute for Restaurant has appropriate format that matches Yelp database
+class Restaurant { // Data structure to load Yelp database in JSON format
+   private String _id; // Each attribute for Restaurant has appropriate format that matches data entries from MongoDB
    private String business_id;
    private String name; 
    private String address;
@@ -251,7 +251,7 @@ class Restaurant { //Data structure to load Yelp database in JSON format
 
    public Restaurant(){} 
 
-   public Restaurant(Restaurant other) { //Deep copy constructor
+   public Restaurant(Restaurant other) { // Deep copy constructor
         this._id = other._id;
         this.business_id = other.business_id;
         this.name = other.name;
@@ -266,7 +266,7 @@ class Restaurant { //Data structure to load Yelp database in JSON format
 
         this.categories = new ArrayList<>(other.categories);
     }
-   
+   // Get and set every attribute for each entry
    public String getID() { 
       return _id; 
    }
@@ -363,15 +363,15 @@ class Restaurant { //Data structure to load Yelp database in JSON format
       this.categories = categories; 
    } 
    
-   public String toString() { //Convert to string to print out necessary information for each restaurant
+   public String toString() { // Convert to string to print out necessary information for each restaurant
       return "name: " + name + ", city: " + city + ", state: " + state + ", address: " + address + ", stars: " + stars + ", categories: " + categories; 
    }  
 }
 
-class CuisineMap { //Map of integers to cuisines/categories to support multiple user inputs
+class CuisineMap { // Map of integers to cuisines/categories to support multiple user inputs
    private Map<Integer, ArrayList<String>> cuisines;
 
-
+   // Map each possible cuisine option to a number which can be entered by the user
    public CuisineMap(){
       cuisines = new HashMap<>();
    }
@@ -380,14 +380,17 @@ class CuisineMap { //Map of integers to cuisines/categories to support multiple 
       return cuisines;
    }
 
-   public void LoadCuisines(){ //Load map with integers to list of one or more cuisines for user selection
+   // Load map with integers to list of one or more cuisines for user selection
+   // Some entries have multiple categories to avoid filtering out relevant options
+    
+   public void LoadCuisines(){
       ArrayList<String> names = new ArrayList<String>();
 
       names = new ArrayList<String>();
       names.add("American (New)");
       cuisines.put(1, names);
       
-      names = new ArrayList<String>(); //Some entries have multiple categories to avoid filtering out relevant options
+      names = new ArrayList<String>();
       names.add("Italian");
       names.add("Pizza");
       cuisines.put(2, names);
@@ -468,7 +471,7 @@ class CuisineMap { //Map of integers to cuisines/categories to support multiple 
       cuisines.put(19, names);
    }
 
-   public void PrintCuisines(){ //Print numerical options for the user
+   public void PrintCuisines(){ // Print numerical options for the user in the command line
       System.out.print("1: American \n");
       System.out.print("2: Italian & Pizza \n");
       System.out.print("3: Bars & Breweries & Gastropubs \n");
